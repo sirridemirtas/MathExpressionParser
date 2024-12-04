@@ -21,6 +21,19 @@ const tokenColors: Record<TokenType, string> = {
   EOF: "gray-400",
 };
 
+const randomExpressions = [
+  "5 + 3 * 2",
+  "sin(45) ^ 2",
+  "(4 + 3)!",
+  "cos(30) * 2",
+  "2^3 + 4",
+  "sin(45 + 45) * 2",
+  "5**2",
+  "3! + 2",
+  "2 ^ (3 + 1)",
+  "sin(30) + cos(60)",
+];
+
 function App() {
   const [expression, setExpression] = useState(
     "(3 + 2!)^2 * sin(30 + 60) - cos((4! / 2^3)) + 5! + (7 - 3)^2!"
@@ -52,6 +65,19 @@ function App() {
     }
   };
 
+  const handleReset = () => {
+    setExpression("");
+    setError(null);
+  };
+
+  const handleRandomExpression = () => {
+    const randomIndex = Math.floor(Math.random() * randomExpressions.length);
+    setExpression(randomExpressions[randomIndex]);
+    handleChange({
+      target: { value: randomExpressions[randomIndex] },
+    } as React.ChangeEvent<HTMLTextAreaElement>);
+  };
+
   useEffect(() => {
     handleChange({
       target: { value: expression },
@@ -74,9 +100,9 @@ function App() {
 
         <div className="space-y-8">
           <div className="bg-white rounded-xl shadow-sm p-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">
               Expression
-            </label>
+            </h2>
             <textarea
               value={expression}
               onChange={handleChange}
@@ -94,6 +120,20 @@ function App() {
               }}
               placeholder="Enter a mathematical expression..."
             />
+            <div className="mt-4 flex space-x-2">
+              <button
+                onClick={handleReset}
+                className="bg-neutral-900 text-white px-4 py-2 rounded-xl hover:bg-neutral-800 transition-all"
+              >
+                Reset
+              </button>
+              <button
+                onClick={handleRandomExpression}
+                className="bg-neutral-200 text-black px-4 py-2 rounded-xl hover:bg-neutral-300 transition-all"
+              >
+                Add Random Expression
+              </button>
+            </div>
           </div>
 
           {error ? (
@@ -105,6 +145,13 @@ function App() {
               <section className="bg-white rounded-xl shadow-sm p-6">
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">
                   Tokens
+                  <small
+                    className="
+                    text-sm text-gray-500 block mt-1 font-normal
+                  "
+                  >
+                    Click on a token to see its details
+                  </small>
                 </h2>
                 <TokenList tokens={tokens} tokenColors={tokenColors} />
               </section>
