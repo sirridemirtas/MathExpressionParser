@@ -33,9 +33,9 @@ export const testCases = [
   { expression: "2 ^ 3", expected: Math.pow(2, 3) },
 
   // Faktöriyel işlemleri
-  { expression: "3!", expected: 6 }, // 3! = 3 * 2 * 1
+  { expression: "3!", expected: 6 },
   { expression: "4! + 5", expected: 24 + 5 },
-  { expression: "5! - 120", expected: 120 - 120 }, // 5! = 120
+  { expression: "5! - 120", expected: 0 },
 
   // Parantezli işlemler
   { expression: "(2 + 3) * 4", expected: (2 + 3) * 4 },
@@ -132,6 +132,7 @@ export function printTestResults(results: TestResult[]): void {
   console.log(`Errors: ${errorTests}`);
 }
 
-// Usage:
-const results = runTests();
-printTestResults(results);
+export const consoleTestResults = () => {
+  const results = runTests();
+  printTestResults(results);
+}

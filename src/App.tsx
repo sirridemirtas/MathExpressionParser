@@ -5,7 +5,7 @@ import { Parser } from "./lib/Parser";
 import { Interpreter } from "./lib/Interpreter";
 import TokenList from "./components/TokenList";
 import TreeNode from "./components/TreeNode";
-import { runTests } from "./lib/test";
+import { testCases } from "./lib/test";
 
 const tokenColors: Record<TokenType, string> = {
   NUMBER: "blue",
@@ -22,19 +22,6 @@ const tokenColors: Record<TokenType, string> = {
   EOF: "gray-400",
 };
 
-const randomExpressions = [
-  "5 + 3 * 2",
-  "sin(45) ^ 2",
-  "(4 + 3)!",
-  "cos(30) * 2",
-  "2^3 + 4",
-  "sin(45 + 45) * 2",
-  "5**2",
-  "3! + 2",
-  "2 ^ (3 + 1)",
-  "sin(30) + cos(60)",
-];
-
 function App() {
   const [expression, setExpression] = useState(
     "(3 + 2!)^2 * sin(30 + 60) - cos((4! / 2^3)) + 5! + (7 - 3)^2!"
@@ -45,24 +32,46 @@ function App() {
   );
   const [ast, setAst] = useState<ReturnType<Parser["parse"]> | null>(null);
   const [result, setResult] = useState<number | null>(null);
+  const [testResult, setTestResult] = useState<{
+    expected: number;
+    passed?: boolean;
+  } | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setExpression(e.target.value);
+    const inputValue = e.target.value;
+    setExpression(inputValue);
+
     try {
-      const lexer = new Lexer(e.target.value);
+      const lexer = new Lexer(inputValue);
       const newTokens = lexer.tokenize();
       setTokens(newTokens);
       const interpreter = new Interpreter();
 
       const parser = new Parser(newTokens);
       const newAst = parser.parse();
+      const calculatedResult = interpreter.interpret(newAst);
       setAst(newAst);
-      setResult(interpreter.interpret(newAst));
+      setResult(calculatedResult);
+
+      // Find if the current expression matches any test case
+      const matchingTestCase = testCases.find(
+        (test) => test.expression === inputValue
+      );
+      if (matchingTestCase) {
+        setTestResult({
+          expected: matchingTestCase.expected,
+          passed: Math.abs(calculatedResult - matchingTestCase.expected) < 1e-6,
+        });
+      } else {
+        setTestResult(null);
+      }
+
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       setTokens([]);
       setAst(null);
+      setTestResult(null);
     }
   };
 
@@ -71,11 +80,12 @@ function App() {
     setError(null);
   };
 
-  const handleRandomExpression = () => {
-    const randomIndex = Math.floor(Math.random() * randomExpressions.length);
-    setExpression(randomExpressions[randomIndex]);
+  const handleRunRandomTest = () => {
+    const randomIndex = Math.floor(Math.random() * testCases.length);
+    const testCase = testCases[randomIndex];
+    setExpression(testCase.expression);
     handleChange({
-      target: { value: randomExpressions[randomIndex] },
+      target: { value: testCase.expression },
     } as React.ChangeEvent<HTMLTextAreaElement>);
   };
 
@@ -83,8 +93,6 @@ function App() {
     handleChange({
       target: { value: expression },
     } as React.ChangeEvent<HTMLTextAreaElement>);
-
-    runTests();
   }, []);
 
   return (
@@ -131,10 +139,10 @@ function App() {
                 Reset
               </button>
               <button
-                onClick={handleRandomExpression}
+                onClick={handleRunRandomTest}
                 className="bg-neutral-200 text-black px-4 py-2 rounded-xl hover:bg-neutral-300 transition-all"
               >
-                Add Random Expression
+                Run Random Test
               </button>
             </div>
           </div>
@@ -166,6 +174,24 @@ function App() {
                   </h2>
                   <div className="font-mono text-2xl text-center text-gray-700">
                     {result}
+                    {testResult && (
+                      <div className="mt-4 text-base">
+                        <div className="text-gray-600">
+                          Expected: {testResult.expected}
+                        </div>
+                        {testResult.passed !== undefined && (
+                          <div
+                            className={
+                              testResult.passed
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }
+                          >
+                            Test {testResult.passed ? "PASSED" : "FAILED"}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </section>
               )}

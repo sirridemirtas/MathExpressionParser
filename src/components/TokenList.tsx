@@ -1,35 +1,33 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import clsx from "clsx";
 import { TokenType } from "../lib/Lexer";
 
-const TokenList = ({
-  tokens,
-  tokenColors,
-}: {
+interface TokenListProps {
   tokens: { type: TokenType; lexeme: string }[];
-  tokenColors: Record<TokenType, string>;
-}) => {
+  tokenColors: Record<string, string>;
+}
+
+const TokenList: React.FC<TokenListProps> = ({ tokens, tokenColors }) => {
   const [selectedToken, setSelectedToken] = useState<{
     type: TokenType;
     lexeme: string;
   } | null>(null);
 
-  const handleTokenClick = (token: { type: TokenType; lexeme: string }) => {
-    setSelectedToken(token);
-  };
+  useEffect(() => {
+    setSelectedToken(null);
+  }, [tokens]);
 
   return (
     <div className={clsx("font-mono", "flex flex-row flex-wrap")}>
       {tokens.map((token, index) => (
         <span
           key={index}
+          onClick={() => setSelectedToken(token)}
           className={clsx(
             String("text-" + tokenColors[token.type] + "-600"),
-            "cursor:pointer hover:bg-gray-200 transition-all",
+            "hover:bg-gray-200 transition-all",
             "px-1 cursor-pointer rounded-sm"
           )}
-          title={token.type}
-          onClick={() => handleTokenClick(token)}
         >
           {token.lexeme}
         </span>
@@ -41,20 +39,6 @@ const TokenList = ({
           </pre>
         </div>
       )}
-      {/* Legend */}
-      {/* <div className="flex flex-row gap-2 flex-wrap">
-        {Object.entries(tokenColors).map(([type, color]) => (
-          <div key={type} className="flex items-center gap-1">
-            <span
-              className={clsx(
-                "text-xs rounded-full w-4 h-4 border",
-                String("bg-" + color)
-              )}
-            ></span>
-            <span className="text-xs">{type}</span>
-          </div>
-        ))}
-      </div> */}
     </div>
   );
 };
