@@ -7,8 +7,8 @@ enum TokenType {
   DIVIDE = "DIVIDE",
   POWER = "POWER",
   FACTORIAL = "FACTORIAL",
-  LEFT_PAREN = "LEFT_PAREN",
-  RIGHT_PAREN = "RIGHT_PAREN",
+  LPAREN = "LPAREN",
+  RPAREN = "RPAREN",
   SIN = "SIN",
   COS = "COS",
   EOF = "EOF"
@@ -58,6 +58,18 @@ class Lexer {
         this.addToken(TokenType.PLUS);
         break;
       case "-":
+        // Check if this might be a negative number
+        if (this.isDigit(this.peek())) {
+          // If we're at the start of input or the previous token was an operator or left paren
+          if (this.tokens.length === 0 || 
+              [TokenType.PLUS, TokenType.MINUS, TokenType.MULTIPLY, 
+               TokenType.DIVIDE, TokenType.POWER, TokenType.LPAREN
+              ].includes(this.tokens[this.tokens.length - 1].type)) {
+            this.current--; // Move back to include the minus sign
+            this.number();
+            break;
+          }
+        }
         this.addToken(TokenType.MINUS);
         break;
       case "*":
@@ -73,10 +85,10 @@ class Lexer {
         this.addToken(TokenType.FACTORIAL);
         break;
       case "(":
-        this.addToken(TokenType.LEFT_PAREN);
+        this.addToken(TokenType.LPAREN);
         break;
       case ")":
-        this.addToken(TokenType.RIGHT_PAREN);
+        this.addToken(TokenType.RPAREN);
         break;
       case " ":
       case "\r":
@@ -97,6 +109,11 @@ class Lexer {
 
   // Handle numeric tokens
   private number() {
+    // Handle negative sign if present
+    if (this.peek() === '-') {
+      this.advance();
+    }
+    
     while (this.isDigit(this.peek())) this.advance();
 
     // Look for fractional part

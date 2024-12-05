@@ -1,4 +1,3 @@
-
 import { ASTNode, NumberNode, BinaryNode, UnaryNode, FunctionNode } from './Parser';
 import { TokenType } from './Lexer';
 

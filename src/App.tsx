@@ -5,6 +5,7 @@ import { Parser } from "./lib/Parser";
 import { Interpreter } from "./lib/Interpreter";
 import TokenList from "./components/TokenList";
 import TreeNode from "./components/TreeNode";
+import { runTests } from "./lib/test";
 
 const tokenColors: Record<TokenType, string> = {
   NUMBER: "blue",
@@ -14,8 +15,8 @@ const tokenColors: Record<TokenType, string> = {
   DIVIDE: "green",
   POWER: "purple",
   FACTORIAL: "purple",
-  LEFT_PAREN: "gray",
-  RIGHT_PAREN: "gray",
+  LPAREN: "gray",
+  RPAREN: "gray",
   SIN: "red",
   COS: "red",
   EOF: "gray-400",
@@ -82,6 +83,8 @@ function App() {
     handleChange({
       target: { value: expression },
     } as React.ChangeEvent<HTMLTextAreaElement>);
+
+    runTests();
   }, []);
 
   return (

@@ -50,7 +50,7 @@ class Parser {
     return this.expression();
   }
 
-  // expression → term ((PLUS | MINUS) term)*
+  // expression: term ((PLUS | MINUS) term)*
   private expression(): ASTNode {
     let expr = this.term();
 
@@ -68,13 +68,13 @@ class Parser {
     return expr;
   }
 
-  // term → factor ((MULTIPLY | DIVIDE) factor)*
+  // term: power ((MULTIPLY | DIVIDE) power)*
   private term(): ASTNode {
-    let expr = this.factor();
+    let expr = this.power();
 
     while (this.match(TokenType.MULTIPLY, TokenType.DIVIDE)) {
       const operator = this.previous().type;
-      const right = this.factor();
+      const right = this.power();
       expr = {
         type: "BinaryNode",
         left: expr,
@@ -86,17 +86,12 @@ class Parser {
     return expr;
   }
 
-  // factor → power
-  private factor(): ASTNode {
-    return this.power();
-  }
-
-  // power → factorial ("^" power)*
+  // power: factorial ("^" factorial)*
   private power(): ASTNode {
     let expr = this.factorial();
 
     while (this.match(TokenType.POWER)) {
-      const right = this.power();
+      const right = this.factorial(); // Changed from power() to factorial()
       expr = {
         type: "BinaryNode",
         left: expr,
@@ -108,9 +103,9 @@ class Parser {
     return expr;
   }
 
-  // factorial → base "!"*
+  // factorial: function "!"*
   private factorial(): ASTNode {
-    let expr = this.base();
+    let expr = this.function();
 
     while (this.match(TokenType.FACTORIAL)) {
       expr = {
@@ -123,12 +118,25 @@ class Parser {
     return expr;
   }
 
-  // base → unary_function | number | "(" expression ")"
-  private base(): ASTNode {
+  // function: "sin" "(" expression ")" | "cos" "(" expression ")" | primary
+  private function(): ASTNode {
     if (this.match(TokenType.SIN, TokenType.COS)) {
-      return this.unaryFunction();
+      const funcType = this.previous().type;
+      this.consume(TokenType.LPAREN, "Expect '(' after function name.");
+      const argument = this.expression();
+      this.consume(TokenType.RPAREN, "Expect ')' after function argument.");
+      return {
+        type: "FunctionNode",
+        name: funcType,
+        argument,
+      } as FunctionNode;
     }
 
+    return this.primary();
+  }
+
+  // primary: NUMBER | "(" expression ")"
+  private primary(): ASTNode {
     if (this.match(TokenType.NUMBER)) {
       return {
         type: "NumberNode",
@@ -136,27 +144,13 @@ class Parser {
       } as NumberNode;
     }
 
-    if (this.match(TokenType.LEFT_PAREN)) {
+    if (this.match(TokenType.LPAREN)) {
       const expr = this.expression();
-      this.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
+      this.consume(TokenType.RPAREN, "Expect ')' after expression.");
       return expr;
     }
 
-    throw new Error("Unexpected token in base expression");
-  }
-
-
-  // unary_function → "sin" "(" expression ")" | "cos" "(" expression ")"
-  private unaryFunction(): ASTNode {
-    const funcType = this.previous().type;
-    this.consume(TokenType.LEFT_PAREN, "Expect '(' after function name.");
-    const argument = this.expression();
-    this.consume(TokenType.RIGHT_PAREN, "Expect ')' after function argument.");
-    return {
-      type: "FunctionNode",
-      name: funcType,
-      argument,
-    } as FunctionNode;
+    throw new Error("Unexpected token in primary expression");
   }
 
   // Helper methods
