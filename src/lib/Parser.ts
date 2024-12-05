@@ -86,12 +86,12 @@ class Parser {
     return expr;
   }
 
-  // power: factorial ("^" factorial)*
+  // power: factorial ("^" power)*
   private power(): ASTNode {
     let expr = this.factorial();
 
-    while (this.match(TokenType.POWER)) {
-      const right = this.factorial(); // Changed from power() to factorial()
+    if (this.match(TokenType.POWER)) {
+      const right = this.power();
       expr = {
         type: "BinaryNode",
         left: expr,
