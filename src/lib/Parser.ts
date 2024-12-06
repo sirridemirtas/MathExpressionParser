@@ -36,6 +36,26 @@ class Parser {
 
   constructor(tokens: Token[]) {
     this.tokens = tokens;
+    this.validateParentheses();
+  }
+
+  private validateParentheses(): void {
+    let parenCount = 0;
+    
+    for (const token of this.tokens) {
+      if (token.type === TokenType.LPAREN) {
+        parenCount++;
+      } else if (token.type === TokenType.RPAREN) {
+        parenCount--;
+        if (parenCount < 0) {
+          throw new Error("Unexpected closing parenthesis");
+        }
+      }
+    }
+    
+    if (parenCount > 0) {
+      throw new Error("Unclosed parenthesis");
+    }
   }
 
   // Add static create method
@@ -142,6 +162,10 @@ class Parser {
         type: "NumberNode",
         value: this.previous().literal!,
       } as NumberNode;
+    }
+
+    if (this.match(TokenType.RPAREN)) {
+      throw new Error("Unexpected closing parenthesis");
     }
 
     if (this.match(TokenType.LPAREN)) {
