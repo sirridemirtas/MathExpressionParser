@@ -50,7 +50,7 @@ class Parser {
     return this.expression();
   }
 
-  // expression: term ((PLUS | MINUS) term)*
+  // <expression> ::= <term> (("+" | "-") <term>)*
   private expression(): ASTNode {
     let expr = this.term();
 
@@ -68,7 +68,7 @@ class Parser {
     return expr;
   }
 
-  // term: power ((MULTIPLY | DIVIDE) power)*
+  // <term> ::= <power> (("*" | "/") <power>)*
   private term(): ASTNode {
     let expr = this.power();
 
@@ -86,7 +86,7 @@ class Parser {
     return expr;
   }
 
-  // power: factorial ("^" power)*
+  // <power> ::= <factorial> ("^" <power>)*
   private power(): ASTNode {
     let expr = this.factorial();
 
@@ -103,7 +103,7 @@ class Parser {
     return expr;
   }
 
-  // factorial: function "!"*
+  // <factorial> ::= <function> ("!")*
   private factorial(): ASTNode {
     let expr = this.function();
 
@@ -118,7 +118,7 @@ class Parser {
     return expr;
   }
 
-  // function: "sin" "(" expression ")" | "cos" "(" expression ")" | primary
+  // <function> ::= "sin" "(" <expression> ")" | "cos" "(" <expression> ")" | <primary>
   private function(): ASTNode {
     if (this.match(TokenType.SIN, TokenType.COS)) {
       const funcType = this.previous().type;
@@ -135,7 +135,7 @@ class Parser {
     return this.primary();
   }
 
-  // primary: NUMBER | "(" expression ")"
+  // <primary> ::= <number> | "(" <expression> ")"
   private primary(): ASTNode {
     if (this.match(TokenType.NUMBER)) {
       return {
