@@ -88,19 +88,36 @@ class Parser {
     return expr;
   }
 
-  // <term> ::= <power> (("*" | "/") <power>)*
+  // <term> ::= <power> (("*" | "/" | ε) <power>)*
+  // where ε represents implicit multiplication (2(3), 2sin(45), (2)(3), etc.)
   private term(): ASTNode {
     let expr = this.power();
 
-    while (this.match(TokenType.MULTIPLY, TokenType.DIVIDE)) {
-      const operator = this.previous().type;
-      const right = this.power();
-      expr = {
-        type: "BinaryNode",
-        left: expr,
-        operator,
-        right,
-      } as BinaryNode;
+    while (true) {
+      if (this.match(TokenType.MULTIPLY, TokenType.DIVIDE)) {
+        const operator = this.previous().type;
+        const right = this.power();
+        expr = {
+          type: "BinaryNode",
+          left: expr,
+          operator,
+          right,
+        } as BinaryNode;
+      } 
+      // Check for implicit multiplication
+      else if (this.check(TokenType.LPAREN) || this.check(TokenType.NUMBER) || 
+               this.check(TokenType.SIN) || this.check(TokenType.COS)) {
+        const right = this.power();
+        expr = {
+          type: "BinaryNode",
+          left: expr,
+          operator: TokenType.MULTIPLY,
+          right,
+        } as BinaryNode;
+      }
+      else {
+        break;
+      }
     }
 
     return expr;
