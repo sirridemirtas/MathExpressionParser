@@ -103,10 +103,7 @@ class Parser {
           operator,
           right,
         } as BinaryNode;
-      } 
-      // Check for implicit multiplication
-      else if (this.check(TokenType.LPAREN) || this.check(TokenType.NUMBER) || 
-               this.check(TokenType.SIN) || this.check(TokenType.COS)) {
+      } else if (this.isImplicitMultiplication()) {
         const right = this.power();
         expr = {
           type: "BinaryNode",
@@ -114,13 +111,17 @@ class Parser {
           operator: TokenType.MULTIPLY,
           right,
         } as BinaryNode;
-      }
-      else {
+      } else {
         break;
       }
     }
 
     return expr;
+  }
+
+  private isImplicitMultiplication(): boolean {
+    return this.check(TokenType.LPAREN) || this.check(TokenType.NUMBER) || 
+           this.check(TokenType.SIN) || this.check(TokenType.COS);
   }
 
   // <power> ::= <factorial> ("^" <power>)*
@@ -187,7 +188,7 @@ class Parser {
 
     if (this.match(TokenType.LPAREN)) {
       const expr = this.expression();
-      this.consume(TokenType.RPAREN, "Expect ')' after expression.");
+      this.consume(TokenType.RPAREN, "Expect ')' after expression");
       return expr;
     }
 
