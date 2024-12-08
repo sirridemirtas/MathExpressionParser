@@ -6,6 +6,7 @@ import { Interpreter } from "./lib/Interpreter";
 import TokenList from "./components/TokenList";
 import TreeNode from "./components/TreeNode";
 import { testCases } from "./lib/test";
+import FunctionalNotation from "./components/FunctionalNotation";
 
 const tokenColors: Record<TokenType, string> = {
   NUMBER: "blue",
@@ -22,7 +23,7 @@ const tokenColors: Record<TokenType, string> = {
   EOF: "gray-400",
 };
 
-function App() {
+const App: React.FC = () => {
   const [expression, setExpression] = useState(
     "(3 + 2!)^2 * sin(30 + 60) - cos((4! / 2^3)) + 5! + (7 - 3)^2!"
   );
@@ -36,6 +37,16 @@ function App() {
     expected: number;
     passed?: boolean;
   } | null>(null);
+  const [showSupportedOperations, setShowSupportedOperations] = useState(false);
+  const [showAst, setShowAst] = useState(false);
+
+  const toggleSupportedOperations = () => {
+    setShowSupportedOperations(!showSupportedOperations);
+  };
+
+  const toggleAstVisibility = () => {
+    setShowAst(!showAst);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const inputValue = e.target.value;
@@ -78,6 +89,11 @@ function App() {
   const handleReset = () => {
     setExpression("");
     setError(null);
+
+    const textarea = document.querySelector("textarea");
+    if (textarea) {
+      textarea.focus();
+    }
   };
 
   const handleRunRandomTest = () => {
@@ -93,20 +109,43 @@ function App() {
     handleChange({
       target: { value: expression },
     } as React.ChangeEvent<HTMLTextAreaElement>);
-  }, []);
+  }, [expression]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <main className="max-w-5xl mx-auto px-4 py-12">
         <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+          <h1 className="text-4xl font-bold text-gray-800 mb-6">
             Math Expression Parser
           </h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Enter a mathematical expression to see its tokens, abstract syntax
-            tree, and result. Supports basic arithmetic(+ - * /), factorial,
-            trigonometric functions(sin, cos), and nested expressions.
-          </p>
+          <div className="text-gray-600 max-w-2xl mx-auto space-y-4">
+            <p className="text-lg">
+              Interactive tool for tokenizing, parsing, and interpreting
+              mathematical expressions
+            </p>
+
+            <div className="text-center mx-auto max-w-xl text-sm ">
+              <div>
+                <h3
+                  className="font-semibold mb-2 cursor-pointer"
+                  onClick={toggleSupportedOperations}
+                >
+                  Click here to see supported operations
+                </h3>
+                {showSupportedOperations && (
+                  <ul className="space-y-1 list-inside">
+                    <li>Basic arithmetic operations (+, -, *, /)</li>
+                    <li>Exponentiation (^)</li>
+                    <li>Factorial operations (!)</li>
+                    <li>Trigonometric functions (sin, cos)</li>
+                    <li>Parentheses for grouping</li>
+                    <li>Integer and decimal numbers</li>
+                    <li>Negative numbers</li>
+                  </ul>
+                )}
+              </div>
+            </div>
+          </div>
         </header>
 
         <div className="space-y-8">
@@ -199,6 +238,15 @@ function App() {
               {ast && (
                 <section className="bg-white rounded-xl shadow-sm p-6">
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                    Functional Notation
+                  </h2>
+                  <FunctionalNotation node={ast} />
+                </section>
+              )}
+
+              {ast && (
+                <section className="bg-white rounded-xl shadow-sm p-6">
+                  <h2 className="text-lg font-semibold text-gray-800 mb-4">
                     Abstract Syntax Tree
                   </h2>
                   <div className="overflow-auto">
@@ -208,13 +256,18 @@ function App() {
               )}
 
               {ast && (
-                <section className="bg-white rounded-xl shadow-sm p-6">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                    Raw AST Data
+                <section className="bg-white rounded-xl shadow-sm p-6 mt-4">
+                  <h2
+                    onClick={toggleAstVisibility}
+                    className="text-lg font-semibold text-gray-800 mb-4 cursor-pointer transition-colors flex items-center"
+                  >
+                    Raw AST Data {showAst ? "↓" : "→"}
                   </h2>
-                  <pre className="overflow-auto text-sm">
-                    <code>{JSON.stringify(ast, null, 2)}</code>
-                  </pre>
+                  {showAst && (
+                    <pre className="overflow-auto text-sm">
+                      <code>{JSON.stringify(ast, null, 2)}</code>
+                    </pre>
+                  )}
                 </section>
               )}
             </div>
@@ -223,10 +276,19 @@ function App() {
       </main>
 
       <footer className="text-center py-8 text-gray-500 text-sm">
-        <p>Copyleft (ɔ) 2024 Sırrı Demirtaş</p>
+        <p>
+          2024 · Copyleft (ɔ) Sırrı Demirtaş ·{" "}
+          <a
+            className="underline decoration-dotted"
+            href="https://github.com/sirridemirtas/MathExpressionParser"
+            target="_blank"
+          >
+            View project on GitHub ↗
+          </a>
+        </p>
       </footer>
     </div>
   );
-}
+};
 
 export default App;
