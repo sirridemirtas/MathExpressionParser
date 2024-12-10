@@ -2,6 +2,8 @@
 
 This project is a Math Expression Parser that tokenizes, interprets and evaluates mathematical expressions using a clearly defined grammar for parsing complex mathematical operations.
 
+![Alt App Preview](public/preview.png "Math Expression Lexer/Parser/Interpreter")
+
 The parser first breaks down input expressions into tokens (like numbers, operators, functions), then uses these tokens to build an Abstract Syntax Tree (AST) which is finally evaluated to produce the result.
 
 ### Features
