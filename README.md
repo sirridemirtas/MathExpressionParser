@@ -4,7 +4,7 @@ This project is a Math Expression Parser that tokenizes, interprets and evaluate
 
 The parser first breaks down input expressions into tokens (like numbers, operators, functions), then uses these tokens to build an Abstract Syntax Tree (AST) which is finally evaluated to produce the result.
 
-### Operator Precedence Rules
+### Features
 
 The grammar below defines the rules for parsing mathematical expressions. It supports various mathematical operations and follows standard operator precedence rules:
 
